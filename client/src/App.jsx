@@ -1,121 +1,85 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/LoginPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import { Box, Button, Typography } from "@mui/material";
+import { useAuth } from "./context/AuthContext";
+import PropertiesPage from "./pages/PropertiesPage";
+import PropertyDetailsPage from "./pages/PropertyDetailsPage";
+import CreatePropertyPage from "./pages/CreatePropertyPage";
+import MyPropertiesPage from "./pages/MyPropertiesPage";
 
-function App() {
-  const [count, setCount] = useState(0)
+function HomePage() {
+  const { user, logout, isAuthenticated } = useAuth();
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <Box sx={{ p: 4 }}>
+      <Typography variant="h3" mb={2}>
+        EstateHub
+      </Typography>
 
-      <div className="ticks"></div>
+      <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
+        <Button component={Link} to="/properties" variant="outlined">
+          Catalog
+        </Button>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        {!isAuthenticated && (
+          <>
+            <Button component={Link} to="/register" variant="contained">
+              Register
+            </Button>
+            <Button component={Link} to="/login" variant="outlined">
+              Login
+            </Button>
+          </>
+        )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {isAuthenticated && (
+          <>
+            {user?.role === "owner" && (
+              <>
+                <Button component={Link} to="/properties/create" variant="contained">
+                  Add Property
+                </Button>
+                <Button component={Link} to="/my-properties" variant="outlined">
+                  My Properties
+                </Button>
+              </>
+            )}
+
+            <Button variant="contained" color="error" onClick={logout}>
+              Logout
+            </Button>
+          </>
+        )}
+      </Box>
+
+      {isAuthenticated && (
+        <Typography variant="h6">
+          Ви увійшли як: {user?.name} ({user?.role})
+        </Typography>
+      )}
+    </Box>
+  );
 }
 
-export default App
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+        <Route path="/properties" element={<PropertiesPage />} />
+<Route path="/properties/:id" element={<PropertyDetailsPage />} />
+<Route path="/properties/create" element={<CreatePropertyPage />} />
+<Route path="/my-properties" element={<MyPropertiesPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
