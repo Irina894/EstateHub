@@ -37,3 +37,25 @@ EstateHub/
 │   └── index.js      # Server entry point
 └── README.md
 
+How to Run the Project
+Clone the repository:
+
+Bash
+git clone [https://github.com/Irina894/EstateHub.git](https://github.com/Irina894/EstateHub.git)
+cd EstateHub
+Server Setup:
+Bash
+cd server
+npm install
+npm start  # or: node index.js
+Client Setup:
+Open a new terminal window in the project root:
+
+Bash
+cd client
+npm install
+npm run dev
+👨‍💻 Author
+Developed by a 2nd-year Computer Science student at Yuriy Fedkovych Chernivtsi National University.
+
+Iryna — Faculty of Computer Science.
