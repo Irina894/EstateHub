@@ -95,7 +95,7 @@ function LoginPage() {
         </Box>
       </Paper>
 
-      <Box sx={{ mt: 2, textAlign: "right" }}>
+      <Box sx={{ mt: 4, textAlign: "right" }}>
   <Button component={Link} to="/forgot-password" size="small">
     Forgot password?
   </Button>
