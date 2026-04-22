@@ -14,6 +14,12 @@ import { useAuth } from "./context/AuthContext";
 import MyApplicationsPage from "./pages/MyApplicationsPage";
 import OwnerApplicationsPage from "./pages/OwnerApplicationsPage";
 import ClientRoute from "./components/ClientRoute";
+import DashboardPage from "./pages/DashboardPage";
+import ProfilePage from "./pages/ProfilePage";
+import AboutPage from "./pages/AboutPage";
+import ContactsPage from "./pages/ContactsPage";
+import MyFavoritesPage from "./pages/MyFavoritesPage";
+
 
 function HomePage() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -42,6 +48,9 @@ function HomePage() {
 
         {isAuthenticated && (
   <>
+  <Button component={Link} to="/dashboard" variant="contained">
+  Dashboard
+</Button>
     {user?.role === "owner" && (
       <>
         <Button component={Link} to="/properties/create" variant="contained">
@@ -67,6 +76,14 @@ function HomePage() {
     </Button>
   </>
 )}
+
+<Button component={Link} to="/about" variant="outlined">
+  About Us
+</Button>
+
+<Button component={Link} to="/contacts" variant="outlined">
+  Contacts
+</Button>
       </Box>
 
       {isAuthenticated && (
@@ -89,6 +106,11 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
         <Route path="/properties" element={<PropertiesPage />} />
         <Route path="/properties/:id" element={<PropertyDetailsPage />} />
+<Route path="/dashboard" element={<DashboardPage />} />
+<Route path="/profile" element={<ProfilePage />} />
+<Route path="/about" element={<AboutPage />} />
+<Route path="/contacts" element={<ContactsPage />} />
+
 
         <Route
           path="/properties/create"
@@ -131,6 +153,15 @@ function App() {
     <OwnerRoute>
       <OwnerApplicationsPage />
     </OwnerRoute>
+  }
+/>
+
+<Route
+  path="/my-favorites"
+  element={
+    <ClientRoute>
+      <MyFavoritesPage />
+    </ClientRoute>
   }
 />
       </Routes>

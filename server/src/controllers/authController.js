@@ -205,11 +205,48 @@ const resetPassword = async (req, res) => {
     });
   }
 };
+// GET PROFILE
+const getProfile = async (req, res) => {
+  try {
+    res.status(200).json(req.user);
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+// UPDATE PROFILE
+const updateProfile = async (req, res) => {
+  try {
+    const { name, phone } = req.body;
+
+    const user = req.user;
+
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
 
 module.exports = {
   registerUser,
   loginUser,
   getMe,
+  getProfile,
+  updateProfile,
   forgotPassword,
   resetPassword,
 };

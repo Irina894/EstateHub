@@ -19,6 +19,24 @@ const createApplication = async (req, res) => {
       });
     }
 
+    if (property.ownerId.toString() === req.user._id.toString()) {
+      return res.status(400).json({
+        message: "You cannot apply for your own property",
+      });
+    }
+
+    if (property.status === "sold" || property.status === "hidden") {
+      return res.status(400).json({
+        message: "Applications are not allowed for this property",
+      });
+    }
+
+    if (property.status === "pending") {
+      return res.status(400).json({
+        message: "This property is already under review",
+      });
+    }
+
     const existingApplication = await Application.findOne({
       propertyId,
       clientId: req.user._id,
@@ -86,6 +104,14 @@ const updateApplicationStatus = async (req, res) => {
   try {
     const { status } = req.body;
 
+    const allowedStatuses = ["new", "in_review", "approved", "rejected"];
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid application status",
+      });
+    }
+
     const application = await Application.findById(req.params.id);
 
     if (!application) {
@@ -102,6 +128,25 @@ const updateApplicationStatus = async (req, res) => {
 
     application.status = status;
     await application.save();
+
+    if (status === "approved") {
+      await Property.findByIdAndUpdate(application.propertyId, {
+        status: "pending",
+      });
+    }
+
+    if (status === "rejected") {
+      const approvedApplication = await Application.findOne({
+        propertyId: application.propertyId,
+        status: "approved",
+      });
+
+      if (!approvedApplication) {
+        await Property.findByIdAndUpdate(application.propertyId, {
+          status: "available",
+        });
+      }
+    }
 
     res.status(200).json({
       message: "Application status updated successfully",

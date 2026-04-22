@@ -62,8 +62,10 @@ function MyApplicationsPage() {
             </Typography>
 
             <Typography sx={{ mt: 1 }}>
-              <strong>Phone:</strong> {application.phone}
-            </Typography>
+             <strong>Created:</strong> {new Date(application.createdAt).toLocaleString()}
+           </Typography>
+
+
 
             <Box sx={{ mt: 2 }}>
               <Chip label={application.status} color="primary" />

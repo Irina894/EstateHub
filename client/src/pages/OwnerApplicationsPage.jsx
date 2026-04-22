@@ -74,7 +74,10 @@ function OwnerApplicationsPage() {
             <Typography sx={{ mt: 1 }}>
               <strong>Message:</strong> {application.message}
             </Typography>
-
+            
+<Typography sx={{ mt: 1 }}>
+  <strong>Created:</strong> {new Date(application.createdAt).toLocaleString()}
+</Typography>
             <Box sx={{ mt: 2, maxWidth: 220 }}>
               <TextField
                 select

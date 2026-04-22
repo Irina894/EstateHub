@@ -33,3 +33,25 @@ export const resetPassword = async (token, password) => {
   });
   return response.data;
 };
+
+export const getProfile = async (token) => {
+  const response = await axios.get("http://localhost:5000/api/auth/profile", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
+export const updateProfile = async (data, token) => {
+  const response = await axios.put(
+    "http://localhost:5000/api/auth/profile",
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+};

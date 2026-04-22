@@ -42,7 +42,7 @@ function LoginPage() {
       setSuccessOpen(true);
 
       setTimeout(() => {
-        navigate("/");
+        navigate("/dashboard");
       }, 1200);
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");

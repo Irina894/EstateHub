@@ -46,7 +46,7 @@ function RegisterPage() {
       setSuccessOpen(true);
 
       setTimeout(() => {
-        navigate("/");
+        navigate("/dashboard");
       }, 1200);
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed");

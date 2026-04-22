@@ -30,6 +30,18 @@ const createProperty = async (req, res) => {
         message: "Please fill in all required property fields",
       });
     }
+    
+const existingProperty = await Property.findOne({
+  ownerId: req.user._id,
+  title: title.trim(),
+  address: address.trim(),
+});
+
+if (existingProperty) {
+  return res.status(400).json({
+    message: "You already have a property with the same title and address",
+  });
+}
 
     const property = await Property.create({
       title,
