@@ -86,7 +86,7 @@ export default function PropertiesPage() {
     properties.filter((p) => {
       if (filters.search   && !p.title?.toLowerCase().includes(filters.search.toLowerCase())) return false;
       if (filters.city     && p.city  !== filters.city)              return false;
-      if (filters.type     && p.type  !== filters.type)              return false;
+    if (filters.type && p.propertyType?.toLowerCase() !== filters.type.toLowerCase()) return false;
       if (filters.minPrice && p.price < Number(filters.minPrice))    return false;
       if (filters.maxPrice && p.price > Number(filters.maxPrice))    return false;
       return true;
