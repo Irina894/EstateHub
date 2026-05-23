@@ -1,37 +1,26 @@
-import axios from "axios";
+// src/api/favoriteApi.js
+import api from "./axios";
 
-const API_URL = "http://localhost:5000/api/favorites";
+/**
+ * Токен автоматично підставляється interceptor-ом, тож сигнатури функцій
+ * стали простіше — приймають лише корисне навантаження.
+ * Сторінки, які раніше передавали `token` другим аргументом, можуть
+ * продовжувати це робити — зайвий аргумент ігнорується.
+ */
 
-export const addToFavorites = async (propertyId, token) => {
-  const response = await axios.post(
-    API_URL,
-    { propertyId },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  return response.data;
+export const addToFavorites = async (propertyId) => {
+  const { data } = await api.post("/favorites", { propertyId });
+  return data;
 };
 
-export const getMyFavorites = async (token) => {
-  const response = await axios.get(`${API_URL}/my`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return response.data;
+export const getMyFavorites = async () => {
+  const { data } = await api.get("/favorites/my");
+  return data;
 };
 
-export const removeFromFavorites = async (propertyId, token) => {
-  const response = await axios.delete(`${API_URL}/${propertyId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return response.data;
+export const removeFromFavorites = async (propertyId) => {
+  const { data } = await api.delete(`/favorites/${propertyId}`);
+  return data;
 };
+
+export default { addToFavorites, getMyFavorites, removeFromFavorites };

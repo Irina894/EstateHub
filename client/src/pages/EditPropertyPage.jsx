@@ -1,205 +1,116 @@
-import { useEffect, useState } from "react";
-import { getPropertyById, updateProperty } from "../api/propertyApi";
-import { useAuth } from "../context/AuthContext";
-import {
-  Alert,
-  Box,
-  Button,
-  MenuItem,
-  Paper,
-  TextField,
-  Typography,
-} from "@mui/material";
+// src/pages/EditPropertyPage.jsx
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Box, CircularProgress, Alert, Button } from "@mui/material";
 
-function EditPropertyPage() {
+import MainLayout from "../components/layout/MainLayout";
+import PropertyForm from "../components/property/PropertyForm";
+import { getPropertyById, updateProperty } from "../api/propertyApi";
+
+/**
+ * EditPropertyPage — тонка обгортка над PropertyForm.
+ *
+ * Її задача:
+ *   1. Завантажити property з бекенду за ID.
+ *   2. Привести формат до того, що очікує форма
+ *      (зокрема — `images` залишається масивом, raw з бекенду).
+ *   3. Відправити PUT при сабміті.
+ */
+export default function EditPropertyPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { token } = useAuth();
 
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    price: "",
-    city: "",
-    address: "",
-    propertyType: "apartment",
-    rooms: "",
-    area: "",
-    status: "available",
-  });
-
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [initialData, setInitialData] = useState(null);
+  const [loadingInit, setLoadingInit] = useState(true);
+  const [loadError, setLoadError]     = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError]   = useState("");
 
   useEffect(() => {
-    const loadProperty = async () => {
+    let active = true;
+    (async () => {
       try {
         const data = await getPropertyById(id);
+        if (!active) return;
 
-        setFormData({
-          title: data.title || "",
-          description: data.description || "",
-          price: data.price || "",
-          city: data.city || "",
-          address: data.address || "",
-          propertyType: data.propertyType || "apartment",
-          rooms: data.rooms || "",
-          area: data.area || "",
-          status: data.status || "available",
+        /*
+         * Перетворюємо backend-shape → form-shape.
+         * Зберігаємо тільки ті поля, які форма редагує.
+         * `images` — array of strings, передаємо as-is.
+         * Числа, які можуть бути null/undefined → порожній рядок
+         * (TextField очікує string для числових полів).
+         */
+        setInitialData({
+          title:        data.title || "",
+          description:  data.description || "",
+          price:        data.price ?? "",
+          city:         data.city || "",
+          address:      data.address || "",
+          propertyType: data.propertyType || "",
+          rooms:        data.rooms ?? "",
+          area:         data.area ?? "",
+          floor:        data.floor ?? "",
+          totalFloors:  data.totalFloors ?? "",
+          status:       data.status || "available",
+          images:       Array.isArray(data.images) ? data.images : [],
+
+          isTopOffer:        !!data.isTopOffer,
+          isPriceReduced:    !!data.isPriceReduced,
+          isRealtorVerified: !!data.isRealtorVerified,
         });
       } catch (err) {
-        setError("Failed to load property");
+        if (!active) return;
+        setLoadError(err?.response?.data?.message || "Failed to load property");
       } finally {
-        setLoading(false);
+        if (active) setLoadingInit(false);
       }
-    };
-
-    loadProperty();
+    })();
+    return () => { active = false; };
   }, [id]);
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (payload) => {
+    setSaving(true);
     setError("");
-
     try {
-      await updateProperty(id, formData, token);
+      await updateProperty(id, payload);
       navigate("/my-properties");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to update property");
+      setError(err?.response?.data?.message || "Failed to update property");
+    } finally {
+      setSaving(false);
     }
   };
 
-  if (loading) {
-    return <Typography sx={{ p: 4 }}>Loading...</Typography>;
+  if (loadingInit) {
+    return (
+      <MainLayout>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 12 }}>
+          <CircularProgress color="primary" />
+        </Box>
+      </MainLayout>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <MainLayout>
+        <Box sx={{ maxWidth: 600, mx: "auto", py: 8, px: 3, textAlign: "center" }}>
+          <Alert severity="error" sx={{ mb: 3 }}>{loadError}</Alert>
+          <Button variant="contained" color="primary" onClick={() => navigate("/my-properties")}>
+            Back to my properties
+          </Button>
+        </Box>
+      </MainLayout>
+    );
   }
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-      <Paper sx={{ p: 4, width: 500 }}>
-        <Typography variant="h4" mb={3}>
-          Edit Property
-        </Typography>
-
-        <Box component="form" onSubmit={handleSubmit}>
-          <TextField
-            label="Title"
-            name="title"
-            fullWidth
-            margin="normal"
-            value={formData.title}
-            onChange={handleChange}
-          />
-
-          <TextField
-            label="Description"
-            name="description"
-            fullWidth
-            margin="normal"
-            multiline
-            rows={4}
-            value={formData.description}
-            onChange={handleChange}
-          />
-
-          <TextField
-            label="Price"
-            name="price"
-            type="number"
-            fullWidth
-            margin="normal"
-            value={formData.price}
-            onChange={handleChange}
-          />
-
-          <TextField
-            label="City"
-            name="city"
-            fullWidth
-            margin="normal"
-            value={formData.city}
-            onChange={handleChange}
-          />
-
-          <TextField
-            label="Address"
-            name="address"
-            fullWidth
-            margin="normal"
-            value={formData.address}
-            onChange={handleChange}
-          />
-
-          <TextField
-            select
-            label="Property Type"
-            name="propertyType"
-            fullWidth
-            margin="normal"
-            value={formData.propertyType}
-            onChange={handleChange}
-          >
-            <MenuItem value="apartment">Apartment</MenuItem>
-            <MenuItem value="house">House</MenuItem>
-            <MenuItem value="commercial">Commercial</MenuItem>
-            <MenuItem value="land">Land</MenuItem>
-          </TextField>
-
-          <TextField
-            label="Rooms"
-            name="rooms"
-            type="number"
-            fullWidth
-            margin="normal"
-            value={formData.rooms}
-            onChange={handleChange}
-          />
-
-          <TextField
-            label="Area"
-            name="area"
-            type="number"
-            fullWidth
-            margin="normal"
-            value={formData.area}
-            onChange={handleChange}
-          />
-
-          <TextField
-            select
-            label="Status"
-            name="status"
-            fullWidth
-            margin="normal"
-            value={formData.status}
-            onChange={handleChange}
-          >
-            <MenuItem value="available">Available</MenuItem>
-            <MenuItem value="pending">Pending</MenuItem>
-            <MenuItem value="sold">Sold</MenuItem>
-            <MenuItem value="hidden">Hidden</MenuItem>
-          </TextField>
-
-          {error && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }}>
-            Save Changes
-          </Button>
-        </Box>
-      </Paper>
-    </Box>
+    <PropertyForm
+      mode="edit"
+      initialData={initialData}
+      onSubmit={handleSubmit}
+      loading={saving}
+      error={error}
+    />
   );
 }
-
-export default EditPropertyPage;

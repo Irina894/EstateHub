@@ -8,6 +8,7 @@ const {
   getMyProperties,
   updateProperty,
   deleteProperty,
+  getSimilarProperties
 } = require("../controllers/propertyController");
 
 const { protect } = require("../middleware/authMiddleware");
@@ -16,10 +17,11 @@ const { authorizeRoles } = require("../middleware/roleMiddleware");
 
 router.get("/", getAllProperties);
 router.get("/my", protect, authorizeRoles("owner"), getMyProperties);
-router.get("/:id", getPropertyById);
 
 router.post("/", protect, authorizeRoles("owner"), createProperty);
 router.put("/:id", protect, authorizeRoles("owner"), updateProperty);
 router.delete("/:id", protect, authorizeRoles("owner"), deleteProperty);
+router.get("/:id/similar", getSimilarProperties);
+router.get("/:id", getPropertyById);
 
 module.exports = router;

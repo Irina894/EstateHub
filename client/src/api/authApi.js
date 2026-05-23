@@ -1,57 +1,50 @@
-import axios from "axios";
+// src/api/authApi.js
+import api from "./axios";
 
-const API_URL = "http://localhost:5000/api/auth";
+/**
+ * Усі захищені запити більше НЕ потребують ручного передавання токена —
+ * його додає request interceptor у axios.js.
+ *
+ * Параметр `token` залишено в getMe лише для backward-compatibility
+ * (його викликає AuthContext під час bootstrap). Якщо переданий — буде
+ * використано саме його (корисно одразу після login, коли interceptor
+ * ще читає старий токен з localStorage). Якщо ні — спрацює interceptor.
+ */
 
 export const registerUser = async (userData) => {
-  const response = await axios.post(`${API_URL}/register`, userData);
-  return response.data;
+  const { data } = await api.post("/auth/register", userData);
+  return data;
 };
 
 export const loginUser = async (userData) => {
-  const response = await axios.post(`${API_URL}/login`, userData);
-  return response.data;
+  const { data } = await api.post("/auth/login", userData);
+  return data;
 };
 
 export const getMe = async (token) => {
-  const response = await axios.get(`${API_URL}/me`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return response.data;
+  const config = token
+    ? { headers: { Authorization: `Bearer ${token}` } }
+    : undefined;
+  const { data } = await api.get("/auth/me", config);
+  return data;
 };
 
 export const forgotPassword = async (email) => {
-  const response = await axios.post(`${API_URL}/forgot-password`, { email });
-  return response.data;
+  const { data } = await api.post("/auth/forgot-password", { email });
+  return data;
 };
 
 export const resetPassword = async (token, password) => {
-  const response = await axios.post(`${API_URL}/reset-password/${token}`, {
-    password,
-  });
-  return response.data;
+  const { data } = await api.post(`/auth/reset-password/${token}`, { password });
+  return data;
 };
 
-export const getProfile = async (token) => {
-  const response = await axios.get("http://localhost:5000/api/auth/profile", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
+export const getProfile = async () => {
+  const { data } = await api.get("/auth/profile");
+  return data;
 };
 
-export const updateProfile = async (data, token) => {
-  const response = await axios.put(
-    "http://localhost:5000/api/auth/profile",
-    data,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  return response.data;
+export const updateProfile = async (payload) => {
+  const { data } = await api.put("/auth/profile", payload);
+  return data;
 };
